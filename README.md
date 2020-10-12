@@ -1,7 +1,7 @@
 # NeRF++
 Codebase for paper: 
 * Work with 360 capture of large-scale unbounded scenes.
-* Support multi-gpu training and inference.
+* Support multi-gpu training and inference with PyTorch DistributedDataParallel (DDP). 
 * Optimize per-image autoexposure (ongoing work)
 
 ## Data
