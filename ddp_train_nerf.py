@@ -1,18 +1,20 @@
 import torch
-# import torch.nn as nn
+import torch.nn as nn
 import torch.optim
 import torch.distributed
 from torch.nn.parallel import DistributedDataParallel as DDP
 import torch.multiprocessing
 import os
 from collections import OrderedDict
-from ddp_model import NerfNet
+from ddp_model import NerfNetWithAutoExpo
 import time
 from data_loader_split import load_data_split
 import numpy as np
 from tensorboardX import SummaryWriter
 from utils import img2mse, mse2psnr, img_HWC2CHW, colorize, TINY_NUMBER
 import logging
+import json
+
 
 logger = logging.getLogger(__package__)
 
@@ -274,6 +276,59 @@ def cleanup():
     torch.distributed.destroy_process_group()
 
 
+def create_nerf(rank, args):
+    ###### create network and wrap in ddp; each process should do this
+    # fix random seed just to make sure the network is initialized with same weights at different processes
+    torch.manual_seed(777)
+    # very important!!! otherwise it might introduce extra memory in rank=0 gpu
+    torch.cuda.set_device(rank)
+
+    models = OrderedDict()
+    models['cascade_level'] = args.cascade_level
+    models['cascade_samples'] = [int(x.strip()) for x in args.cascade_samples.split(',')]
+    for m in range(models['cascade_level']):
+        img_names = None
+        if args.optim_autoexpo:
+            # load training image names for autoexposure
+            f = os.path.join(args.basedir, args.expname, 'train_images.json')
+            with open(f) as file:
+                img_names = json.load(file)
+        net = NerfNetWithAutoExpo(args, optim_autoexpo=args.optim_autoexpo, img_names=img_names).to(rank)
+        net = DDP(net, device_ids=[rank], output_device=rank, find_unused_parameters=True)
+        # net = DDP(net, device_ids=[rank], output_device=rank)
+        optim = torch.optim.Adam(net.parameters(), lr=args.lrate)
+        models['net_{}'.format(m)] = net
+        models['optim_{}'.format(m)] = optim
+
+    start = -1
+
+    ###### load pretrained weights; each process should do this
+    if (args.ckpt_path is not None) and (os.path.isfile(args.ckpt_path)):
+        ckpts = [args.ckpt_path]
+    else:
+        ckpts = [os.path.join(args.basedir, args.expname, f)
+                 for f in sorted(os.listdir(os.path.join(args.basedir, args.expname))) if f.endswith('.pth')]
+    def path2iter(path):
+        tmp = os.path.basename(path)[:-4]
+        idx = tmp.rfind('_')
+        return int(tmp[idx + 1:])
+    ckpts = sorted(ckpts, key=path2iter)
+    logger.info('Found ckpts: {}'.format(ckpts))
+    if len(ckpts) > 0 and not args.no_reload:
+        fpath = ckpts[-1]
+        logger.info('Reloading from: {}'.format(fpath))
+        start = path2iter(fpath)
+        # configure map_location properly for different processes
+        map_location = {'cuda:%d' % 0: 'cuda:%d' % rank}
+        to_load = torch.load(fpath, map_location=map_location)
+        for m in range(models['cascade_level']):
+            for name in ['net_{}'.format(m), 'optim_{}'.format(m)]:
+                models[name].load_state_dict(to_load[name])
+                models[name].load_state_dict(to_load[name])
+
+    return start, models
+
+
 def ddp_train_nerf(rank, args):
     ###### set up multi-processing
     setup(rank, args.world_size)
@@ -306,50 +361,20 @@ def ddp_train_nerf(rank, args):
                 file.write(open(args.config, 'r').read())
     torch.distributed.barrier()
 
-    ray_samplers = load_data_split(args.datadir, args.scene, split='train', try_load_min_depth=args.load_min_depth)
-    val_ray_samplers = load_data_split(args.datadir, args.scene, split='validation', try_load_min_depth=args.load_min_depth)
+    ray_samplers = load_data_split(args.datadir, args.scene, split='train',
+                                   try_load_min_depth=args.load_min_depth)
+    val_ray_samplers = load_data_split(args.datadir, args.scene, split='validation',
+                                       try_load_min_depth=args.load_min_depth, skip=args.testskip)
+
+    # write training image names for autoexposure
+    if args.optim_autoexpo:
+        f = os.path.join(args.basedir, args.expname, 'train_images.json')
+        with open(f, 'w') as file:
+            img_names = [ray_samplers[i].img_path for i in range(len(ray_samplers))]
+            json.dump(img_names, file, indent=2)
 
     ###### create network and wrap in ddp; each process should do this
-    # fix random seed just to make sure the network is initialized with same weights at different processes
-    torch.manual_seed(777)
-    # very important!!! otherwise it might introduce extra memory in rank=0 gpu
-    torch.cuda.set_device(rank)
-
-    models = OrderedDict()
-    models['cascade_level'] = args.cascade_level
-    models['cascade_samples'] = [int(x.strip()) for x in args.cascade_samples.split(',')]
-    for m in range(models['cascade_level']):
-        net = NerfNet(args).to(rank)
-        net = DDP(net, device_ids=[rank], output_device=rank)
-        optim = torch.optim.Adam(net.parameters(), lr=args.lrate)
-        models['net_{}'.format(m)] = net
-        models['optim_{}'.format(m)] = optim
-
-    start = -1
-
-    ###### load pretrained weights; each process should do this
-    if (args.ckpt_path is not None) and (os.path.isfile(args.ckpt_path)):
-        ckpts = [args.ckpt_path]
-    else:
-        ckpts = [os.path.join(args.basedir, args.expname, f)
-                 for f in sorted(os.listdir(os.path.join(args.basedir, args.expname))) if f.endswith('.pth')]
-    def path2iter(path):
-        tmp = os.path.basename(path)[:-4]
-        idx = tmp.rfind('_')
-        return int(tmp[idx + 1:])
-    ckpts = sorted(ckpts, key=path2iter)
-    logger.info('Found ckpts: {}'.format(ckpts))
-    if len(ckpts) > 0 and not args.no_reload:
-        fpath = ckpts[-1]
-        logger.info('Reloading from: {}'.format(fpath))
-        start = path2iter(fpath)
-        # configure map_location properly for different processes
-        map_location = {'cuda:%d' % 0: 'cuda:%d' % rank}
-        to_load = torch.load(fpath, map_location=map_location)
-        for m in range(models['cascade_level']):
-            for name in ['net_{}'.format(m), 'optim_{}'.format(m)]:
-                models[name].load_state_dict(to_load[name])
-                models[name].load_state_dict(to_load[name])
+    start, models = create_nerf(rank, args)
 
     ##### important!!!
     # make sure different processes sample different rays
@@ -416,13 +441,23 @@ def ddp_train_nerf(rank, args):
                 bg_depth, _ = torch.sort(torch.cat((bg_depth, bg_depth_samples), dim=-1))
 
             optim.zero_grad()
-            ret = net(ray_batch['ray_o'], ray_batch['ray_d'], fg_far_depth, fg_depth, bg_depth)
+            ret = net(ray_batch['ray_o'], ray_batch['ray_d'], fg_far_depth, fg_depth, bg_depth, img_name=ray_batch['img_name'])
             all_rets.append(ret)
 
             rgb_gt = ray_batch['rgb'].to(rank)
-            loss = img2mse(ret['rgb'], rgb_gt)
-            scalars_to_log['level_{}/loss'.format(m)] = loss.item()
-            scalars_to_log['level_{}/pnsr'.format(m)] = mse2psnr(loss.item())
+            if 'autoexpo' in ret:
+                scale, shift = ret['autoexpo']
+                scalars_to_log['level_{}/autoexpo_scale'.format(m)] = scale.item()
+                scalars_to_log['level_{}/autoexpo_shift'.format(m)] = shift.item()
+                # rgb_gt = scale * rgb_gt + shift
+                rgb_pred = (ret['rgb'] - shift) / scale
+                rgb_loss = img2mse(rgb_pred, rgb_gt)
+                loss = rgb_loss + args.lambda_autoexpo * (torch.abs(scale-1.)+torch.abs(shift))
+            else:
+                rgb_loss = img2mse(ret['rgb'], rgb_gt)
+                loss = rgb_loss
+            scalars_to_log['level_{}/loss'.format(m)] = rgb_loss.item()
+            scalars_to_log['level_{}/pnsr'.format(m)] = mse2psnr(rgb_loss.item())
             loss.backward()
             optim.step()
 
@@ -462,7 +497,7 @@ def ddp_train_nerf(rank, args):
                 logger.info('Logged a random training view in {} seconds'.format(dt))
                 log_view_to_tb(writer, global_step, log_data, gt_img=ray_samplers[idx].get_img(), mask=None, prefix='train/')
 
-            log_data = None
+            del log_data
             torch.cuda.empty_cache()
 
         if rank == 0 and (global_step % args.i_weights == 0 and global_step > 0):
@@ -523,6 +558,11 @@ def config_parser():
     # multiprocess learning
     parser.add_argument("--world_size", type=int, default='-1',
                         help='number of processes')
+    # optimize autoexposure
+    parser.add_argument("--optim_autoexpo", action='store_true',
+                        help='optimize autoexposure parameters')
+    parser.add_argument("--lambda_autoexpo", type=float, default=1., help='regularization weight for autoexposure')
+
     # learning rate options
     parser.add_argument("--lrate", type=float, default=5e-4, help='learning rate')
     parser.add_argument("--lrate_decay_factor", type=float, default=0.1,
@@ -530,8 +570,6 @@ def config_parser():
     parser.add_argument("--lrate_decay_steps", type=int, default=5000,
                         help='decay learning rate by a factor every specified number of steps')
     # rendering options
-    parser.add_argument("--inv_uniform", action='store_true',
-                        help='if True, will uniformly sample inverse depths')
     parser.add_argument("--det", action='store_true', help='deterministic sampling for coarse and fine samples')
     parser.add_argument("--max_freq_log2", type=int, default=10,
                         help='log2 of max freq for positional encoding (3D location)')

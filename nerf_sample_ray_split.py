@@ -172,11 +172,12 @@ class RaySamplerSingleImage(object):
             ('depth', depth),
             ('rgb', rgb),
             ('mask', mask),
-            ('min_depth', min_depth)
+            ('min_depth', min_depth),
+            ('img_name', self.img_path)
         ])
         # return torch tensors
         for k in ret:
-            if ret[k] is not None:
+            if isinstance(ret[k], np.ndarray):
                 ret[k] = torch.from_numpy(ret[k])
 
         return ret

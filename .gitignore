@@ -1,6 +1,9 @@
 # scripts
 *.sh
 
+# mac
+.DS_Store
+
 # pycharm
 .idea/
 

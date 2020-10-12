@@ -5,6 +5,9 @@ import torch.nn as nn
 from utils import TINY_NUMBER, HUGE_NUMBER
 from collections import OrderedDict
 from nerf_network import Embedder, MLPNet
+import os
+import logging
+logger = logging.getLogger(__package__)
 
 
 ######################################################################################
@@ -44,14 +47,6 @@ def depth2pts_outside(ray_o, ray_d, depth):
 
 class NerfNet(nn.Module):
     def __init__(self, args):
-        '''
-        :param D: network depth
-        :param W: network width
-        :param input_ch: input channels for encodings of (x, y, z)
-        :param input_ch_viewdirs: input channels for encodings of view directions
-        :param skips: skip connection in network
-        :param use_viewdirs: if True, will use the view directions as input
-        '''
         super().__init__()
         # foreground
         self.fg_embedder_position = Embedder(input_dim=3,
@@ -145,4 +140,49 @@ class NerfNet(nn.Module):
                            ('bg_rgb', bg_rgb_map),
                            ('bg_depth', bg_depth_map),
                            ('bg_lambda', bg_lambda)])
+        return ret
+
+
+def remap_name(name):
+    name = name.replace('.', '-')  # dot is not allowed by pytorch
+    if name[-1] == '/':
+        name = name[:-1]
+    idx = name.rfind('/')
+    for i in range(2):
+        if idx >= 0:
+            idx = name[:idx].rfind('/')
+    return name[idx + 1:]
+
+
+class NerfNetWithAutoExpo(nn.Module):
+    def __init__(self, args, optim_autoexpo=False, img_names=None):
+        super().__init__()
+        self.nerf_net = NerfNet(args)
+
+        self.optim_autoexpo = optim_autoexpo
+        if self.optim_autoexpo:
+            assert(img_names is not None)
+            logger.info('Optimizing autoexposure!')
+
+            self.img_names = [remap_name(x) for x in img_names]
+            logger.info('\n'.join(self.img_names))
+            self.autoexpo_params = nn.ParameterDict(OrderedDict([(x, nn.Parameter(torch.Tensor([0.5, 0.]))) for x in self.img_names]))
+
+    def forward(self, ray_o, ray_d, fg_z_max, fg_z_vals, bg_z_vals, img_name=None):
+        '''
+        :param ray_o, ray_d: [..., 3]
+        :param fg_z_max: [...,]
+        :param fg_z_vals, bg_z_vals: [..., N_samples]
+        :return
+        '''
+        ret = self.nerf_net(ray_o, ray_d, fg_z_max, fg_z_vals, bg_z_vals)
+
+        if img_name is not None:
+            img_name = remap_name(img_name)
+        if self.optim_autoexpo and (img_name in self.autoexpo_params):
+            autoexpo = self.autoexpo_params[img_name]
+            scale = torch.abs(autoexpo[0]) + 0.5 # make sure scale is always positive
+            shift = autoexpo[1]
+            ret['autoexpo'] = (scale, shift)
+
         return ret

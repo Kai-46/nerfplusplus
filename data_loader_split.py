@@ -24,16 +24,22 @@ def find_files(dir, exts):
         return []
 
 
-def load_data_split(basedir, scene, split, skip=1, try_load_min_depth=True):
+def load_data_split(basedir, scene, split, skip=1, try_load_min_depth=True, only_img_files=False):
+
     def parse_txt(filename):
         assert os.path.isfile(filename)
         nums = open(filename).read().split()
         return np.array([float(x) for x in nums]).reshape([4, 4]).astype(np.float32)
 
     split_dir = '{}/{}/{}'.format(basedir, scene, split)
+
+    if only_img_files:
+        img_files = find_files('{}/rgb'.format(split_dir), exts=['*.png', '*.jpg'])
+        return img_files
+
+    # camera parameters files
     intrinsics_files = find_files('{}/intrinsics'.format(split_dir), exts=['*.txt'])
     pose_files = find_files('{}/pose'.format(split_dir), exts=['*.txt'])
-
     logger.info('raw intrinsics_files: {}'.format(len(intrinsics_files)))
     logger.info('raw pose_files: {}'.format(len(pose_files)))
 
@@ -49,6 +55,7 @@ def load_data_split(basedir, scene, split, skip=1, try_load_min_depth=True):
         assert(len(img_files) == cam_cnt)
     else:
         img_files = [None, ] * cam_cnt
+
     # mask files
     mask_files = find_files('{}/mask'.format(split_dir), exts=['*.png', '*.jpg'])
     if len(mask_files) > 0:
@@ -67,11 +74,12 @@ def load_data_split(basedir, scene, split, skip=1, try_load_min_depth=True):
     else:
         mindepth_files = [None, ] * cam_cnt
 
-    # assume all images have the same size
+    # assume all images have the same size as training image
     train_imgfile = find_files('{}/{}/train/rgb'.format(basedir, scene), exts=['*.png', '*.jpg'])[0]
     train_im = imageio.imread(train_imgfile)
     H, W = train_im.shape[:2]
 
+    # create ray samplers
     ray_samplers = []
     for i in range(cam_cnt):
         intrinsics = parse_txt(intrinsics_files[i])

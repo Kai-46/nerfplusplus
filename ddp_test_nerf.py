@@ -2,17 +2,17 @@ import torch
 # import torch.nn as nn
 import torch.optim
 import torch.distributed
-from torch.nn.parallel import DistributedDataParallel as DDP
+# from torch.nn.parallel import DistributedDataParallel as DDP
 import torch.multiprocessing
 import numpy as np
 import os
-from collections import OrderedDict
-from ddp_model import NerfNet
+# from collections import OrderedDict
+# from ddp_model import NerfNet
 import time
 from data_loader_split import load_data_split
 from utils import mse2psnr, colorize_np, to8b
 import imageio
-from ddp_run_nerf import config_parser, setup_logger, setup, cleanup, render_single_image
+from ddp_train_nerf import config_parser, setup_logger, setup, cleanup, render_single_image, create_nerf
 import logging
 
 
@@ -37,46 +37,7 @@ def ddp_test_nerf(rank, args):
         args.chunk_size = 4096
 
     ###### create network and wrap in ddp; each process should do this
-    # fix random seed just to make sure the network is initialized with same weights at different processes
-    torch.manual_seed(777)
-    # very important!!! otherwise it might introduce extra memory in rank=0 gpu
-    torch.cuda.set_device(rank)
-
-    models = OrderedDict()
-    models['cascade_level'] = args.cascade_level
-    models['cascade_samples'] = [int(x.strip()) for x in args.cascade_samples.split(',')]
-    for m in range(models['cascade_level']):
-        net = NerfNet(args).to(rank)
-        net = DDP(net, device_ids=[rank], output_device=rank)
-        optim = torch.optim.Adam(net.parameters(), lr=args.lrate)
-        models['net_{}'.format(m)] = net
-        models['optim_{}'.format(m)] = optim
-
-    start = -1
-
-    ###### load pretrained weights; each process should do this
-    if (args.ckpt_path is not None) and (os.path.isfile(args.ckpt_path)):
-        ckpts = [args.ckpt_path]
-    else:
-        ckpts = [os.path.join(args.basedir, args.expname, f)
-                 for f in sorted(os.listdir(os.path.join(args.basedir, args.expname))) if f.endswith('.pth')]
-    def path2iter(path):
-        tmp = os.path.basename(path)[:-4]
-        idx = tmp.rfind('_')
-        return int(tmp[idx + 1:])
-    ckpts = sorted(ckpts, key=path2iter)
-    logger.info('Found ckpts: {}'.format(ckpts))
-    if len(ckpts) > 0 and not args.no_reload:
-        fpath = ckpts[-1]
-        logger.info('Reloading from: {}'.format(fpath))
-        start = path2iter(fpath)
-        # configure map_location properly for different processes
-        map_location = {'cuda:%d' % 0: 'cuda:%d' % rank}
-        to_load = torch.load(fpath, map_location=map_location)
-        for m in range(models['cascade_level']):
-            for name in ['net_{}'.format(m), 'optim_{}'.format(m)]:
-                models[name].load_state_dict(to_load[name])
-                models[name].load_state_dict(to_load[name])
+    start, models = create_nerf(rank, args)
 
     render_splits = [x.strip() for x in args.render_splits.strip().split(',')]
     # start testing
@@ -156,5 +117,4 @@ def test():
 if __name__ == '__main__':
     setup_logger()
     test()
-
 
