@@ -18,12 +18,12 @@ Codebase for paper:
 conda env create --file environment.yml
 ```
 
-## Training
+## Training (Use all available GPUs by default)
 ```python
 python ddp_train_nerf.py --config configs/tanks_and_temples/tat_training_truck.txt
 ```
 
-## Testing
+## Testing (Use all available GPUs by default)
 ```python
 python ddp_test_nerf.py --config configs/tanks_and_temples/tat_training_truck.txt --render_splits test,camera_path
 ```
