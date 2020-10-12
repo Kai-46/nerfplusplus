@@ -4,8 +4,8 @@ Codebase for paper:
 * Support multi-gpu training and inference.
 
 ## Data
-* Download our preprocessed data from [tanks_and_temples](), [lf_data]().
-* Put the data in the code directory.
+* Download our preprocessed data from [tanks_and_temples](https://drive.google.com/file/d/11KRfN91W1AxAW6lOFs4EeYDbeoQZCi87/view?usp=sharing), [lf_data](https://drive.google.com/file/d/1gsjDjkbTh4GAR9fFqlIDZ__qR9NYTURQ/view?usp=sharing).
+* Put the data in the sub-folder data/ of this code directory.
 * Data format. 
     * Each scene consists of 3 splits: train/test/validation. 
     * Intrinsics and poses are stored as flattened 4x4 matrices.
