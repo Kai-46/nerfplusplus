@@ -7,6 +7,7 @@ from collections import OrderedDict
 import logging
 logger = logging.getLogger(__package__)
 
+
 class Embedder(nn.Module):
     def __init__(self, input_dim, max_freq_log2, N_freqs,
                        log_sampling=True, include_input=True,
@@ -67,8 +68,8 @@ def weights_init(m):
 
 
 class MLPNet(nn.Module):
-    def __init__(self, D=8, W=256, input_ch=3, input_ch_viewdirs=3, skips=[4], use_viewdirs=False
-                 , use_implicit=False):
+    def __init__(self, D=8, W=256, input_ch=3, input_ch_viewdirs=3,
+                 skips=[4], use_viewdirs=False):
         '''
         :param D: network depth
         :param W: network width
@@ -78,10 +79,6 @@ class MLPNet(nn.Module):
         :param use_viewdirs: if True, will use the view directions as input
         '''
         super().__init__()
-
-        self.use_implicit = use_implicit
-        if self.use_implicit:
-            logger.info('Using implicit regularization as well!')
 
         self.input_ch = input_ch
         self.input_ch_viewdirs = input_ch_viewdirs
@@ -104,35 +101,21 @@ class MLPNet(nn.Module):
         self.sigma_layers = nn.Sequential(*sigma_layers)
         # self.sigma_layers.apply(weights_init)      # xavier init
 
-        base_dim = dim
-        # diffuse color
-        diffuse_rgb_layers = []
-        dim = base_dim
-        for i in range(1):
-            diffuse_rgb_layers.append(nn.Linear(dim, W))
-            diffuse_rgb_layers.append(nn.ReLU())
-            dim = W
-        diffuse_rgb_layers.append(nn.Linear(dim, 3))
-        diffuse_rgb_layers.append(nn.Sigmoid())
-        self.diffuse_rgb_layers = nn.Sequential(*diffuse_rgb_layers)
-        # self.diffuse_rgb_layers.apply(weights_init)
-
-        # specular color
-        specular_rgb_layers = []
-        dim = base_dim
+        # rgb color
+        rgb_layers = []
         base_remap_layers = [nn.Linear(dim, 256), ]
         self.base_remap_layers = nn.Sequential(*base_remap_layers)
         # self.base_remap_layers.apply(weights_init)
 
         dim = 256 + self.input_ch_viewdirs
         for i in range(1):
-            specular_rgb_layers.append(nn.Linear(dim, W))
-            specular_rgb_layers.append(nn.ReLU())
+            rgb_layers.append(nn.Linear(dim, W))
+            rgb_layers.append(nn.ReLU())
             dim = W
-        specular_rgb_layers.append(nn.Linear(dim, 3))
-        specular_rgb_layers.append(nn.Sigmoid())     # rgb values are normalized to [0, 1]
-        self.specular_rgb_layers = nn.Sequential(*specular_rgb_layers)
-        # self.specular_rgb_layers.apply(weights_init)
+        rgb_layers.append(nn.Linear(dim, 3))
+        rgb_layers.append(nn.Sigmoid())     # rgb values are normalized to [0, 1]
+        self.rgb_layers = nn.Sequential(*rgb_layers)
+        # self.rgb_layers.apply(weights_init)
 
     def forward(self, input):
         '''
@@ -150,18 +133,10 @@ class MLPNet(nn.Module):
         sigma = self.sigma_layers(base)
         sigma = torch.abs(sigma)
 
-        diffuse_rgb = self.diffuse_rgb_layers(base)
-
         base_remap = self.base_remap_layers(base)
         input_viewdirs = input[..., -self.input_ch_viewdirs:]
-        specular_rgb = self.specular_rgb_layers(torch.cat((base_remap, input_viewdirs), dim=-1))
-
-        if self.use_implicit:
-            rgb = specular_rgb
-        else:
-            rgb = diffuse_rgb + specular_rgb
+        rgb = self.rgb_layers(torch.cat((base_remap, input_viewdirs), dim=-1))
 
         ret = OrderedDict([('rgb', rgb),
-                           ('diffuse_rgb', diffuse_rgb),
                            ('sigma', sigma.squeeze(-1))])
         return ret

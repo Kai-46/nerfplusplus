@@ -1,22 +1,19 @@
 import torch
-import torch.nn as nn
+# import torch.nn as nn
 import torch.optim
 import torch.distributed
 from torch.nn.parallel import DistributedDataParallel as DDP
 import torch.multiprocessing
-
 import os
 from collections import OrderedDict
 from ddp_model import NerfNet
 import time
-
 from data_loader_split import load_data_split
-
 import numpy as np
 from tensorboardX import SummaryWriter
 from utils import img2mse, mse2psnr, img_HWC2CHW, colorize, TINY_NUMBER
-
 import logging
+
 logger = logging.getLogger(__package__)
 
 
@@ -427,11 +424,6 @@ def ddp_train_nerf(rank, args):
             loss = img2mse(ret['rgb'], rgb_gt)
             scalars_to_log['level_{}/loss'.format(m)] = loss.item()
             scalars_to_log['level_{}/pnsr'.format(m)] = mse2psnr(loss.item())
-            # regularize sigma with photo-consistency
-            diffuse_loss = img2mse(ret['diffuse_rgb'], rgb_gt)
-            scalars_to_log['level_{}/diffuse_loss'.format(m)] = diffuse_loss.item()
-            scalars_to_log['level_{}/diffuse_psnr'.format(m)] = mse2psnr(diffuse_loss.item())
-            loss = (1. - args.regularize_weight) * loss + args.regularize_weight * diffuse_loss
             loss.backward()
             optim.step()
 
@@ -571,9 +563,6 @@ def config_parser():
                         help='apply the trick to avoid fitting to white background')
 
     # use implicit
-    parser.add_argument("--use_implicit", action='store_true', help='whether to use implicit regularization')
-    parser.add_argument("--regularize_weight", type=float, default=0.5,
-                        help='regularizing weight of auxiliary loss')
     parser.add_argument("--load_min_depth", action='store_true', help='whether to load min depth')
 
     # no training; render only

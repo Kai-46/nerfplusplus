@@ -63,8 +63,7 @@ class NerfNet(nn.Module):
         self.fg_net = MLPNet(D=args.netdepth, W=args.netwidth,
                              input_ch=self.fg_embedder_position.out_dim,
                              input_ch_viewdirs=self.fg_embedder_viewdir.out_dim,
-                             use_viewdirs=args.use_viewdirs,
-                             use_implicit=args.use_implicit)
+                             use_viewdirs=args.use_viewdirs)
         # background; bg_pt is (x, y, z, 1/r)
         self.bg_embedder_position = Embedder(input_dim=4,
                                              max_freq_log2=args.max_freq_log2 - 1,
@@ -75,8 +74,7 @@ class NerfNet(nn.Module):
         self.bg_net = MLPNet(D=args.netdepth, W=args.netwidth,
                              input_ch=self.bg_embedder_position.out_dim,
                              input_ch_viewdirs=self.bg_embedder_viewdir.out_dim,
-                             use_viewdirs=args.use_viewdirs,
-                             use_implicit=args.use_implicit)
+                             use_viewdirs=args.use_viewdirs)
 
     def forward(self, ray_o, ray_d, fg_z_max, fg_z_vals, bg_z_vals):
         '''
@@ -109,7 +107,6 @@ class NerfNet(nn.Module):
         T = torch.cat((torch.ones_like(T[..., 0:1]), T[..., :-1]), dim=-1)  # [..., N_samples]
         fg_weights = fg_alpha * T     # [..., N_samples]
         fg_rgb_map = torch.sum(fg_weights.unsqueeze(-1) * fg_raw['rgb'], dim=-2)  # [..., 3]
-        fg_diffuse_rgb_map = torch.sum(fg_weights.unsqueeze(-1) * fg_raw['diffuse_rgb'], dim=-2)  # [..., 3]
         fg_depth_map = torch.sum(fg_weights * fg_z_vals, dim=-1)     # [...,]
 
         # render background
@@ -133,18 +130,14 @@ class NerfNet(nn.Module):
         T = torch.cat((torch.ones_like(T[..., 0:1]), T), dim=-1)  # [..., N_samples]
         bg_weights = bg_alpha * T  # [..., N_samples]
         bg_rgb_map = torch.sum(bg_weights.unsqueeze(-1) * bg_raw['rgb'], dim=-2)  # [..., 3]
-        bg_diffuse_rgb_map = torch.sum(bg_weights.unsqueeze(-1) * bg_raw['diffuse_rgb'], dim=-2)  # [..., 3]
         bg_depth_map = torch.sum(bg_weights * bg_z_vals, dim=-1)  # [...,]
 
         # composite foreground and background
         bg_rgb_map = bg_lambda.unsqueeze(-1) * bg_rgb_map
-        bg_diffuse_rgb_map = bg_lambda.unsqueeze(-1) * bg_diffuse_rgb_map
         bg_depth_map = bg_lambda * bg_depth_map
         rgb_map = fg_rgb_map + bg_rgb_map
-        diffuse_rgb_map = fg_diffuse_rgb_map + bg_diffuse_rgb_map
 
         ret = OrderedDict([('rgb', rgb_map),            # loss
-                           ('diffuse_rgb', diffuse_rgb_map),   # regularize
                            ('fg_weights', fg_weights),  # importance sampling
                            ('bg_weights', bg_weights),  # importance sampling
                            ('fg_rgb', fg_rgb_map),      # below are for logging
