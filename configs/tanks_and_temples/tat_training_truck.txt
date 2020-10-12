@@ -30,7 +30,6 @@ netdepth = 8
 netwidth = 256
 use_viewdirs = True
 
-
 ### CONSOLE AND TENSORBOARD
 i_img = 2000
 i_print = 100
