@@ -25,5 +25,6 @@ python ddp_train_nerf.py --config configs/tanks_and_temples/tat_training_truck.t
 
 ## Testing (Use all available GPUs by default)
 ```python
-python ddp_test_nerf.py --config configs/tanks_and_temples/tat_training_truck.txt --render_splits test,camera_path
+python ddp_test_nerf.py --config configs/tanks_and_temples/tat_training_truck.txt \
+                        --render_splits test,camera_path
 ```
