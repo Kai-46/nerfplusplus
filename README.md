@@ -7,10 +7,15 @@ Codebase for paper:
 * Download our preprocessed data from [tanks_and_temples](), [lf_data]().
 * Put the data in the code directory.
 * Data format. 
-** Each scene consists of 3 splits: train/test/validation. 
-** Intrinsics and poses are stored as flattened 4x4 matrices.
-** Opencv camera coordinate system is adopted, i.e., x--->right, y--->down, z--->scene.
-* Scene normalization: move the average camera center to origin, and put all the camera centers inside the unit sphere.
+    * Each scene consists of 3 splits: train/test/validation. 
+    * Intrinsics and poses are stored as flattened 4x4 matrices.
+    * Opencv camera coordinate system is adopted, i.e., x--->right, y--->down, z--->scene.
+    * Scene normalization: move the average camera center to origin, and put all the camera centers inside the unit sphere.
+
+## Create environment
+```bash
+conda env create --file environment.yml
+```
 
 ## Training
 ```python
