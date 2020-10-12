@@ -1,0 +1,48 @@
+### INPUT
+datadir = /home/zhangka2/gernot_experi/gernot_data/gernot_nerf_sphere
+scene = tat_training_Truck
+expname = tat_training_Truck_ddp_bignet
+basedir = ./logs
+config = None
+ckpt_path = None
+no_reload = False
+testskip = 1
+
+### TRAINING
+N_iters = 1250001
+N_rand = 256
+lrate = 0.0005
+lrate_decay_factor = 0.1
+lrate_decay_steps = 500000
+
+### CASCADE
+cascade_level = 2
+cascade_samples = 64,128
+near_depth = 0.
+far_depth = 1.
+
+### TESTING
+render_only = False
+render_test = False
+render_train = False
+# chunk_size = 16384
+chunk_size = 4096
+
+### RENDERING
+det = False
+max_freq_log2 = 10
+max_freq_log2_viewdirs = 4
+netdepth = 8
+netwidth = 512
+raw_noise_std = 1.0
+N_iters_perturb = 1000
+inv_uniform = False
+use_viewdirs = True
+white_bkgd = False
+
+### CONSOLE AND TENSORBOARD
+i_img = 2000
+i_print = 100
+i_testset = 5000000
+i_video = 5000000
+i_weights = 5000
