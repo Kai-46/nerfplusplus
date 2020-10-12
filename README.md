@@ -16,6 +16,7 @@ Codebase for paper:
 ## Create environment
 ```bash
 conda env create --file environment.yml
+conda activate nerf-ddp
 ```
 
 ## Training (Use all available GPUs by default)
