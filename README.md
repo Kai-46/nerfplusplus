@@ -2,7 +2,7 @@
 Codebase for arXiv preprint: 
 * Work with 360 capture of large-scale unbounded scenes.
 * Support multi-gpu training and inference with PyTorch DistributedDataParallel (DDP). 
-* Optimize per-image autoexposure (**experimental feature**)
+* Optimize per-image autoexposure (**experimental feature**).
 
 ## Data
 * Download our preprocessed data from [tanks_and_temples](https://drive.google.com/file/d/11KRfN91W1AxAW6lOFs4EeYDbeoQZCi87/view?usp=sharing), [lf_data](https://drive.google.com/file/d/1gsjDjkbTh4GAR9fFqlIDZ__qR9NYTURQ/view?usp=sharing).
