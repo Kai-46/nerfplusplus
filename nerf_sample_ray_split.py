@@ -7,15 +7,6 @@ import imageio
 ########################################################################################################################
 # ray batch sampling
 ########################################################################################################################
-
-def parse_camera(params):
-    H, W = params[:2]
-    intrinsics = params[2:18].reshape((4, 4))
-    c2w = params[18:34].reshape((4, 4))
-
-    return int(W), int(H), intrinsics.astype(np.float32), c2w.astype(np.float32)
-
-
 def get_rays_single_image(H, W, intrinsics, c2w):
     '''
     :param H: image height
