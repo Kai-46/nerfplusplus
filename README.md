@@ -9,7 +9,7 @@ Codebase for arXiv preprint:
 * Put the data in the sub-folder data/ of this code directory.
 * Data format. 
     * Each scene consists of 3 splits: train/test/validation. 
-    * Intrinsics and poses are stored as flattened 4x4 matrices; poses are camera-to-world.
+    * Intrinsics and poses are stored as flattened 4x4 matrices (row-major); poses are camera-to-world, not world-to-camera transformations.
     * Opencv camera coordinate system is adopted, i.e., x--->right, y--->down, z--->scene.
     * To convert camera poses between Opencv and Opengl conventions, the following snippet can be used for both Opengl2Opencv and Opencv2Opengl.
       ```python
