@@ -13,7 +13,7 @@ Codebase for arXiv preprint "NeRF++: Analyzing and Improving Neural Radiance Fie
     * Pixel coordinate of an image's upper-left corner is (column, row)=(0, 0). 
     * Poses are camera-to-world, not world-to-camera transformations.
     * Opencv camera coordinate system is adopted, i.e., x--->right, y--->down, z--->scene.
-    * To convert camera poses between Opencv and Opengl conventions, the following snippet can be used for both Opengl2Opencv and Opencv2Opengl.
+    * To convert camera poses between Opencv and Opengl conventions, the following code snippet can be used for both Opengl2Opencv and Opencv2Opengl.
       ```python
       import numpy as np
       def convert_pose(C2W):
