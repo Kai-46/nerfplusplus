@@ -40,3 +40,14 @@ python ddp_train_nerf.py --config configs/tanks_and_temples/tat_training_truck.t
 python ddp_test_nerf.py --config configs/tanks_and_temples/tat_training_truck.txt \
                         --render_splits test,camera_path
 ```
+
+## Citation
+Plese cite our work if you use the code.
+```python
+@article{kaizhang2020,
+    author    = {Kai Zhang and Gernot Riegler and Noah Snavely and Vladlen Koltun},
+    title     = {NeRF++: Analyzing and Improving Neural Radiance Fields},
+    journal   = {arXiv:1801.09847},
+    year      = {2020},
+}
+```
