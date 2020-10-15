@@ -109,7 +109,7 @@ class MLPNet(nn.Module):
 
         dim = 256 + self.input_ch_viewdirs
         for i in range(1):
-            rgb_layers.append(nn.Linear(dim, W))
+            rgb_layers.append(nn.Linear(dim, W // 2))
             rgb_layers.append(nn.ReLU())
             dim = W
         rgb_layers.append(nn.Linear(dim, 3))

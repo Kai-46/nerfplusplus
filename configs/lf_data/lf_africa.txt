@@ -9,7 +9,7 @@ no_reload = False
 testskip = 1
 
 ### TRAINING
-N_iters = 1250001
+N_iters = 500001
 N_rand = 512
 lrate = 0.0005
 lrate_decay_factor = 0.1
