@@ -4,6 +4,9 @@ Codebase for arXiv preprint "NeRF++: Analyzing and Improving Neural Radiance Fie
 * Support multi-gpu training and inference with PyTorch DistributedDataParallel (DDP). 
 * Optimize per-image autoexposure (**experimental feature**).
 
+## Demo
+![](demo/tat_Truck.gif) ![](demo/tat_Playground.gif)
+
 ## Data
 * Download our preprocessed data from [tanks_and_temples](https://drive.google.com/file/d/11KRfN91W1AxAW6lOFs4EeYDbeoQZCi87/view?usp=sharing), [lf_data](https://drive.google.com/file/d/1gsjDjkbTh4GAR9fFqlIDZ__qR9NYTURQ/view?usp=sharing).
 * Put the data in the sub-folder data/ of this code directory.
