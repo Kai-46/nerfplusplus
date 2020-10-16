@@ -111,7 +111,7 @@ class MLPNet(nn.Module):
         for i in range(1):
             rgb_layers.append(nn.Linear(dim, W // 2))
             rgb_layers.append(nn.ReLU())
-            dim = W
+            dim = W // 2
         rgb_layers.append(nn.Linear(dim, 3))
         rgb_layers.append(nn.Sigmoid())     # rgb values are normalized to [0, 1]
         self.rgb_layers = nn.Sequential(*rgb_layers)
