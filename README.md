@@ -1,5 +1,5 @@
 # NeRF++
-Codebase for arXiv preprint "NeRF++: Analyzing and Improving Neural Radiance Fields"
+Codebase for arXiv preprint ["NeRF++: Analyzing and Improving Neural Radiance Fields"](http://arxiv.org/abs/2010.07492)
 * Work with 360 capture of large-scale unbounded scenes.
 * Support multi-gpu training and inference with PyTorch DistributedDataParallel (DDP). 
 * Optimize per-image autoexposure (**experimental feature**).
@@ -53,7 +53,7 @@ Plese cite our work if you use the code.
 @article{kaizhang2020,
     author    = {Kai Zhang and Gernot Riegler and Noah Snavely and Vladlen Koltun},
     title     = {NeRF++: Analyzing and Improving Neural Radiance Fields},
-    journal   = {arXiv:1801.09847},
+    journal   = {arXiv:2010.07492},
     year      = {2020},
 }
 ```
