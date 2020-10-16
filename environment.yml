@@ -1,4 +1,4 @@
-name: nerf-ddp
+name: nerfplusplus
 channels:
   - defaults
 dependencies:
@@ -90,5 +90,5 @@ dependencies:
     - werkzeug==1.0.1
     - wrapt==1.12.1
     - zipp==3.1.0
-prefix: /home/zhangka2/anaconda3/envs/nerf-ddp
+prefix: /home/zhangka2/anaconda3/envs/nerfplusplus
 
