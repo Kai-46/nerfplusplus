@@ -45,7 +45,7 @@ python ddp_test_nerf.py --config configs/tanks_and_temples/tat_training_truck.tx
                         --render_splits test,camera_path
 ```
 
-**Note**: due to restriction imposed by torch.gather function, please make sure the number of pixels in each image is divisible by the number of GPUs if you render images parallelly. 
+**Note**: due to restriction imposed by torch.distributed.gather function, please make sure the number of pixels in each image is divisible by the number of GPUs if you render images parallelly. 
 
 ## Citation
 Plese cite our work if you use the code.
