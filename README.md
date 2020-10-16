@@ -31,7 +31,7 @@ Codebase for arXiv preprint ["NeRF++: Analyzing and Improving Neural Radiance Fi
 ## Create environment
 ```bash
 conda env create --file environment.yml
-conda activate nerf-ddp
+conda activate nerfplusplus
 ```
 
 ## Training (Use all available GPUs by default)
