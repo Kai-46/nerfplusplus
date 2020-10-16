@@ -149,8 +149,7 @@ def render_single_image(rank, world_size, models, ray_sampler, chunk_size):
             if m == 0:
                 # foreground depth
                 fg_far_depth = intersect_sphere(ray_o, ray_d)  # [...,]
-                # fg_near_depth = 0.18 * torch.ones_like(fg_far_depth)
-                fg_near_depth = min_depth  # [..., 3]
+                fg_near_depth = min_depth  # [..., ]
                 step = (fg_far_depth - fg_near_depth) / (N_samples - 1)
                 fg_depth = torch.stack([fg_near_depth + i * step for i in range(N_samples)], dim=-1)  # [..., N_samples]
 
@@ -413,8 +412,7 @@ def ddp_train_nerf(rank, args):
             if m == 0:
                 # foreground depth
                 fg_far_depth = intersect_sphere(ray_batch['ray_o'], ray_batch['ray_d'])  # [...,]
-                # fg_near_depth = 0.18 * torch.ones_like(fg_far_depth)
-                fg_near_depth = ray_batch['min_depth']  # [..., 3]
+                fg_near_depth = ray_batch['min_depth']  # [..., ]
                 step = (fg_far_depth - fg_near_depth) / (N_samples - 1)
                 fg_depth = torch.stack([fg_near_depth + i * step for i in range(N_samples)], dim=-1)  # [..., N_samples]
                 fg_depth = perturb_samples(fg_depth)   # random perturbation during training
