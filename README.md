@@ -15,7 +15,7 @@ Codebase for arXiv preprint ["NeRF++: Analyzing and Improving Neural Radiance Fi
     * Intrinsics and poses are stored as flattened 4x4 matrices (row-major).
     * Pixel coordinate of an image's upper-left corner is (column, row)=(0, 0), lower-right corner is (width-1, height-1).
     * Poses are camera-to-world, not world-to-camera transformations.
-    * Opencv camera coordinate system is adopted, i.e., x--->right, y--->down, z--->scene.
+    * Opencv camera coordinate system is adopted, i.e., x--->right, y--->down, z--->scene. Similarly, intrinsic matrix also follows Opencv convention.
     * To convert camera poses between Opencv and Opengl conventions, the following code snippet can be used for both Opengl2Opencv and Opencv2Opengl.
       ```python
       import numpy as np
