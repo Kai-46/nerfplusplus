@@ -323,7 +323,6 @@ def create_nerf(rank, args):
         for m in range(models['cascade_level']):
             for name in ['net_{}'.format(m), 'optim_{}'.format(m)]:
                 models[name].load_state_dict(to_load[name])
-                models[name].load_state_dict(to_load[name])
 
     return start, models
 
