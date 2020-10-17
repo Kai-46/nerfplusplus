@@ -548,10 +548,6 @@ def config_parser():
                         help='number of cascade levels')
     parser.add_argument("--cascade_samples", type=str, default='64,64',
                         help='samples at each level')
-    parser.add_argument("--devices", type=str, default='0,1',
-                        help='cuda device for each level')
-    parser.add_argument("--bg_devices", type=str, default='0,2',
-                        help='cuda device for the background of each level')
     # multiprocess learning
     parser.add_argument("--world_size", type=int, default='-1',
                         help='number of processes')
