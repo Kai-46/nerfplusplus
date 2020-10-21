@@ -64,6 +64,6 @@ You can use the scripts inside *'colmap_runner/'* to generate camera poses from 
 * Inside *'colmap_runner/'*, execute command *'python run_colmap.py'*.
 * After program finishes running, you would see the posed images in the folder *'out_dir/posed_images'*. 
     * Distortion-free images are inside *'out_dir/posed_images/images'*.
-    * Raw COLMAP intrinsics poses are stored as a json file *'out_dir/posed_images/kai_cameras.json'*.
-    * Normalized camderas is stored in *'out_dir/posed_images/kai_cameras_normalized.json'*. See the *'Scene normalization method'* in the *'Data'* section.
+    * Raw COLMAP intrinsics and poses are stored as a json file *'out_dir/posed_images/kai_cameras.json'*.
+    * Normalized camderas are stored in *'out_dir/posed_images/kai_cameras_normalized.json'*. See the *'Scene normalization method'* in the *'Data'* section.
     * Split distortion-free images and their correspoinding normalized cameras according to your need.
