@@ -58,7 +58,7 @@ Plese cite our work if you use the code.
 }
 ```
 
-## Generating poses with [COLMAP SfM](https://colmap.github.io/)
+## Generate poses with [COLMAP SfM](https://colmap.github.io/)
 You can use the scripts inside 'colmap_runner/' to generate camera poses from images with COLMAP SfM.
 * Specify 'img_dir' and 'out_dir' in 'colmap_runner/run_colmap.py'.
 * Inside 'colmap_runner/', execute command 'python run_colmap.py'.
