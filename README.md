@@ -59,10 +59,11 @@ Plese cite our work if you use the code.
 ```
 
 ## Generate poses with [COLMAP SfM](https://colmap.github.io/)
-You can use the scripts inside 'colmap_runner/' to generate camera poses from images with COLMAP SfM.
-* Specify 'img_dir' and 'out_dir' in 'colmap_runner/run_colmap.py'.
-* Inside 'colmap_runner/', execute command 'python run_colmap.py'.
-* After program finishes running, you would see the posed images in the folder 'out_dir/posed_images'. 
-    * Distortion-free images are inside 'out_dir/posed_images/images'.
-    * Raw COLMAP poses is stored as a json file 'out_dir/posed_images/kai_cameras.json'.
-    * Normalized camderas is stored in 'out_dir/posed_images/kai_cameras_normalized.json'. See the 'Scene normalization method' in the 'Data' section.
+You can use the scripts inside *'colmap_runner/'* to generate camera poses from images with COLMAP SfM.
+* Specify *'img_dir'* and *'out_dir'* in *'colmap_runner/run_colmap.py'*.
+* Inside *'colmap_runner/'*, execute command *'python run_colmap.py'*.
+* After program finishes running, you would see the posed images in the folder *'out_dir/posed_images'*. 
+    * Distortion-free images are inside *'out_dir/posed_images/images'*.
+    * Raw COLMAP intrinsics poses are stored as a json file *'out_dir/posed_images/kai_cameras.json'*.
+    * Normalized camderas is stored in *'out_dir/posed_images/kai_cameras_normalized.json'*. See the *'Scene normalization method'* in the *'Data'* section.
+    * Split distortion-free images and their correspoinding normalized cameras according to your need.
