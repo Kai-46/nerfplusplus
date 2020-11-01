@@ -31,6 +31,9 @@ def load_data_split(basedir, scene, split, skip=1, try_load_min_depth=True, only
         nums = open(filename).read().split()
         return np.array([float(x) for x in nums]).reshape([4, 4]).astype(np.float32)
 
+    if basedir[-1] == '/':          # remove trailing '/'
+        basedir = basedir[:-1]
+     
     split_dir = '{}/{}/{}'.format(basedir, scene, split)
 
     if only_img_files:
