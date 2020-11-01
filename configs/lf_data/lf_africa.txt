@@ -10,7 +10,7 @@ testskip = 1
 
 ### TRAINING
 N_iters = 500001
-N_rand = 512
+N_rand = 1024
 lrate = 0.0005
 lrate_decay_factor = 0.1
 lrate_decay_steps = 50000000
