@@ -59,17 +59,17 @@ Plese cite our work if you use the code.
 ```
 
 ## Generate camera parameters (intrinsics and poses) with [COLMAP SfM](https://colmap.github.io/)
-You can use the scripts inside *'colmap_runner/'* to generate camera parameters from images with COLMAP SfM.
-* Specify *'img_dir'* and *'out_dir'* in *'colmap_runner/run_colmap.py'*.
-* Inside *'colmap_runner/'*, execute command *'python run_colmap.py'*.
-* After program finishes, you would see the posed images in the folder *'out_dir/posed_images'*. 
-    * Distortion-free images are inside *'out_dir/posed_images/images'*.
-    * Raw COLMAP intrinsics and poses are stored as a json file *'out_dir/posed_images/kai_cameras.json'*.
-    * Normalized cameras are stored in *'out_dir/posed_images/kai_cameras_normalized.json'*. See the *'Scene normalization method'* in the *'Data'* section.
-    * Split distortion-free images and their correspoinding normalized cameras according to your need.
+You can use the scripts inside `colmap_runner` to generate camera parameters from images with COLMAP SfM.
+* Specify `img_dir` and `out_dir` in `colmap_runner/run_colmap.py`.
+* Inside `colmap_runner/`, execute command `python run_colmap.py`.
+* After program finishes, you would see the posed images in the folder `out_dir/posed_images`. 
+    * Distortion-free images are inside `out_dir/posed_images/images`.
+    * Raw COLMAP intrinsics and poses are stored as a json file `out_dir/posed_images/kai_cameras.json`.
+    * Normalized cameras are stored in `out_dir/posed_images/kai_cameras_normalized.json`. See the **Scene normalization method** in the **Data** section.
+    * Split distortion-free images and `kai_cameras_normalized.json` according to your need.
 
 ## Visualize cameras in 3D
-Check *camera_visualizer/visualize_cameras.py* for visualizing cameras in 3D. It creates an interactive viewer for you to inspect whether your cameras have been normalized to be compatible with this codebase. Below is a screenshot of the viewer: green cameras are used for training, blue ones are for testing, while yellow ones denote a novel camera path to be synthesized.
+Check `camera_visualizer/visualize_cameras.py` for visualizing cameras in 3D. It creates an interactive viewer for you to inspect whether your cameras have been normalized to be compatible with this codebase. Below is a screenshot of the viewer: green cameras are used for training, blue ones are for testing, while yellow ones denote a novel camera path to be synthesized.
 
 <!-- ![](camera_visualizer/screenshot_lowres.png) -->
 <img src="camera_visualizer/screenshot_lowres.png" width="280">
