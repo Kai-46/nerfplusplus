@@ -76,7 +76,7 @@ Check `camera_visualizer/visualize_cameras.py` for visualizing cameras in 3D. It
 
 
 ## Inspect camera parameters
-You can use `camera_inspector/inspect_epipolar_geometry.py` to inspect if the camera paramters are correct and follow the Opencv convention assumed by this codebase. The script creates a viewer for visually inspecting epipolar geometry like below: for key points in the top image, it plots their correspoinding epipolar lines in the bottom image. If the epipolar geometry does not look correct in this visualization, it's likely that there are some issues with the camera parameters.
+You can use `camera_inspector/inspect_epipolar_geometry.py` to inspect if the camera paramters are correct and follow the Opencv convention assumed by this codebase. The script creates a viewer for visually inspecting two-view epipolar geometry like below: for key points in the left image, it plots their correspoinding epipolar lines in the right image. If the epipolar geometry does not look correct in this visualization, it's likely that there are some issues with the camera parameters.
 
 <img src="camera_inspector/screenshot_lowres.png" width="600">
 
