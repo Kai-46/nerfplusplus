@@ -50,8 +50,8 @@ def inspect(img1, K1, W2C1, img2, K2, W2C2):
 
     img1, img2 = drawpointslines(img1, pts1, img2, lines2, colors)
     
-    im_to_show = np.concatenate((img1, img2), axis=0)
-    # down sample
+    im_to_show = np.concatenate((img1, img2), axis=1)
+    # down sample to fit screen
     h, w = im_to_show.shape[:2]
     im_to_show = cv2.resize(im_to_show, (int(0.5*w), int(0.5*h)), interpolation=cv2.INTER_AREA)
     cv2.imshow('epipolar geometry', im_to_show)
