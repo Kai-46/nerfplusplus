@@ -19,7 +19,7 @@ def get_tf_cams(cam_dict, target_radius=1.):
         return center.flatten(), diagonal
 
     center, diagonal = get_center_and_diag(cam_centers)
-    radius = diagonal / 2. * 1.1
+    radius = diagonal * 1.1
 
     translate = -center
     scale = target_radius / radius
