@@ -66,7 +66,7 @@ You can use the scripts inside `colmap_runner` to generate camera parameters fro
     * Distortion-free images are inside `out_dir/posed_images/images`.
     * Raw COLMAP intrinsics and poses are stored as a json file `out_dir/posed_images/kai_cameras.json`.
     * Normalized cameras are stored in `out_dir/posed_images/kai_cameras_normalized.json`. See the **Scene normalization method** in the **Data** section.
-    * Split distortion-free images and `kai_cameras_normalized.json` according to your need.
+    * Split distortion-free images and `kai_cameras_normalized.json` according to your need. You might find the self-explanatory `data_loader_split.py` helpful when you try converting the json file to data format compatible with NeRF++.
 
 ## Visualize cameras in 3D
 Check `camera_visualizer/visualize_cameras.py` for visualizing cameras in 3D. It creates an interactive viewer for you to inspect whether your cameras have been normalized to be compatible with this codebase. Below is a screenshot of the viewer: green cameras are used for training, blue ones are for testing, while yellow ones denote a novel camera path to be synthesized; red sphere is the unit sphere.
