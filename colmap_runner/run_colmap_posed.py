@@ -37,14 +37,14 @@ def run_sift_matching(img_dir, db_file):
                                     --SiftExtraction.estimate_affine_shape 0 \
                                     --SiftExtraction.domain_size_pooling 1 \
                                     --SiftExtraction.num_threads 32 \
-                                    --SiftExtraction.use_gpu 0 \
+                                    --SiftExtraction.use_gpu 1 \
                                     --SiftExtraction.gpu_index {}'.format(db_file, img_dir, gpu_index)
     bash_run(cmd)
 
     # feature matching
     cmd = ' exhaustive_matcher --database_path {} \
                                      --SiftMatching.guided_matching 1 \
-                                     --SiftMatching.use_gpu 0 \
+                                     --SiftMatching.use_gpu 1 \
                                      --SiftMatching.gpu_index {}'.format(db_file, gpu_index)
 
     bash_run(cmd)
