@@ -39,6 +39,8 @@ conda activate nerfplusplus
 python ddp_train_nerf.py --config configs/tanks_and_temples/tat_training_truck.txt
 ```
 
+**Note: In the paper, we train NeRF++ on a node with 4 RTX 2080 Ti GPUs, which took ∼24 hours.**
+
 ## Testing (Use all available GPUs by default)
 ```python
 python ddp_test_nerf.py --config configs/tanks_and_temples/tat_training_truck.txt \
