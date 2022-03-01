@@ -49,6 +49,9 @@ python ddp_test_nerf.py --config configs/tanks_and_temples/tat_training_truck.tx
 
 **Note**: due to restriction imposed by torch.distributed.gather function, please make sure the number of pixels in each image is divisible by the number of GPUs if you render images parallelly. 
 
+## Pretrained weights
+I recently re-trained NeRF++ on the tanks and temples data for another project. Here are the checkpoints ([google drive](https://drive.google.com/drive/folders/15P0vCeDiLULzktvFByE5mb6fucJomvHr?usp=sharing)) just in case you might find them useful.
+
 ## Citation
 Plese cite our work if you use the code.
 ```python
