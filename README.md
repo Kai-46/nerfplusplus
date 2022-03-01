@@ -26,7 +26,7 @@ Codebase for arXiv preprint ["NeRF++: Analyzing and Improving Neural Radiance Fi
           C2W = np.matmul(C2W, flip_yz)
           return C2W
       ```
-    * Scene normalization: move the average camera center to origin, and put all the camera centers inside the unit sphere.
+    * Scene normalization: move the average camera center to origin, and put all the camera centers inside the unit sphere. Check [normalize_cam_dict.py](https://github.com/Kai-46/nerfplusplus/blob/master/colmap_runner/normalize_cam_dict.py) for details.
 
 ## Create environment
 ```bash
